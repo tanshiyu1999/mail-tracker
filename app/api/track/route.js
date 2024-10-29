@@ -21,6 +21,18 @@ export async function GET(request) {
     console.error("Error updating email tracking:", error);
   }
 
-  return NextResponse.json(null, { status: 200 });
+  
+  // Path to a 1x1 transparent pixel image
+  const imagePath = path.resolve("./public/pixel.png");
 
+  // Read the pixel image
+  const image = fs.readFileSync(imagePath);
+
+  // Return the pixel image with a 200 status code
+  return new NextResponse(image, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/png",
+    },
+  });
 }

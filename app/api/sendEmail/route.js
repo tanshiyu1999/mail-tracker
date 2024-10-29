@@ -1,14 +1,14 @@
 // pages/api/sendEmail.js
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
-
+import { sql } from '@vercel/postgres';
 
 export async function POST(req, res) {
   const { to, subject, text } = await req.json();
 
   const trackingId = uuidv4();
 
-
+  console.log(trackingId)
   // Create a transporter
   const transporter = nodemailer.createTransport({
     service: "gmail", // or any other email service
@@ -30,9 +30,13 @@ export async function POST(req, res) {
     html: `${text} <img src="${process.env.BASE_URL}/api/track?trackingId=${trackingId}" width="1" height="1" alt="" style="display:none;" />`,
   };
 
+
+
   try {
     await transporter.sendMail(mailOptions);
-    console.log("sent");
+
+    await sql`INSERT INTO email_tracking (tracking_id, recipient_email, subject) VALUES (${trackingId}, ${to}, ${subject})`;
+    
     return new Response(
       JSON.stringify({ message: "Email sent successfully" }),
       { status: 200 }

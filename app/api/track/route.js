@@ -1,6 +1,5 @@
-import path from "path";
-import fs from "fs";
 import { NextResponse } from "next/server";
+import { sql } from '@vercel/postgres';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -12,14 +11,16 @@ export async function GET(request) {
     console.log("Email opened, but no trackingId found");
   }
 
-  // Path to a 1x1 transparent pixel image
-  const imagePath = path.resolve("./public/pixel.png");
+  try {
+    await sql`
+      UPDATE email_tracking 
+      SET opened = TRUE, opened_at = CURRENT_TIMESTAMP 
+      WHERE tracking_id = ${trackingId};
+    `;
+  } catch (error) {
+    console.error("Error updating email tracking:", error);
+  }
 
-  // Read the pixel image and return it as a response
-  const image = fs.readFileSync(imagePath);
-  return new NextResponse(image, {
-    headers: {
-      "Content-Type": "image/png",
-    },
-  });
+  return NextResponse.json(null, { status: 200 });
+
 }

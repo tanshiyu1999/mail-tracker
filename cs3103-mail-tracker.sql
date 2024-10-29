@@ -1,9 +1,0 @@
-CREATE TABLE email_tracking (
-  id SERIAL PRIMARY KEY,
-  tracking_id UUID UNIQUE NOT NULL,
-  recipient_email VARCHAR(255) NOT NULL,
-  subject VARCHAR(255),
-  sent_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-  opened BOOLEAN DEFAULT FALSE,
-  opened_at TIMESTAMPTZ
-);

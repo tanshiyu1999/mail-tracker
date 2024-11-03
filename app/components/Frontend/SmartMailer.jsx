@@ -23,22 +23,29 @@ export default function SmartMailer() {
 
     logMessage('Sending emails...');
 
-    // Send data to orchestrator to start the email-sending process
-    const response = await fetch('/api/sendEmails', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        department,
-        csvFilePath: csvFile,
-        templatePath: textFile,
-      }),
-    });
+    // Use FormData to handle file uploads
+    const formData = new FormData();
+    formData.append('department', department);
+    formData.append('csvFile', csvFile);
+    formData.append('textFile', textFile);
 
-    if (response.ok) {
-      const reportData = await response.json();
-      logMessage(`Report: ${reportData.message}`); // Adjust this based on the response format
-    } else {
-      logMessage('Failed to send emails.');
+    // Send data to orchestrator to start the email-sending process
+    try {
+      // Send the FormData object to the backend
+      const response = await fetch('/api/sendEmails', {
+        method: 'POST',
+        body: formData, // FormData object
+      });
+
+      if (response.ok) {
+        const reportData = await response.json();
+        logMessage(`Report: ${reportData.message}`);
+      } else {
+        logMessage('Failed to send emails.');
+      }
+    } catch (error) {
+      logMessage('Error sending request to server.');
+      console.error('Error:', error);
     }
   };
 

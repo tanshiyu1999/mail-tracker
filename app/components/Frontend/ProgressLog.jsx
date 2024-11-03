@@ -6,7 +6,7 @@ export default function ProgressLog({ logMessages }) {
       <h3>Progress log:</h3>
       <div className="log-messages">
         {logMessages.map((msg, index) => (
-          <p key={index}>{msg}</p>
+          <pre key={index}>{msg}</pre>  // Using <pre> tag
         ))}
       </div>
     </div>

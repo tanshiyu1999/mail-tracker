@@ -21,10 +21,14 @@ export default function SmartMailer() {
       return;
     }
 
+    console.log(department)
+    console.log(csvFile)
+    console.log(textFile)
+
     logMessage('Sending emails...');
 
     // Send data to orchestrator to start the email-sending process
-    const response = await fetch('/api/sendEmails', {
+    const response = await fetch('/api/sendEmail', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -52,8 +56,28 @@ export default function SmartMailer() {
 
     if (response.ok) {
       const openCounts = await response.json();
-      openCounts.forEach((entry) => {
-        logMessage(`Email sent to ${entry.department} opened ${entry.count} times`);
+      console.log(openCounts)
+
+      // Print out the report about the number of emails have been sent
+      logMessage("-----------------------------------\nDepartment\t\tNumber of emails");
+      Object.keys(openCounts).forEach((entry) => {
+        logMessage(`${entry}\t\t\t${openCounts[entry].email_count}`);
+      });
+
+      // Print out the report of the viewed times of each email batch
+      logMessage("-----------------------------------\nDepartment\t\tSubject\t\tOpen times");
+      Object.keys(openCounts).forEach((entry) => {
+        let first_flag = 1
+        Object.keys(openCounts[entry].batch_opened).forEach((batch) => {
+          const current_b = openCounts[entry].batch_opened[batch]
+          if(first_flag==1){
+            logMessage(`${entry}\t\t\t${current_b['subject']}\t\t\t${current_b['open_times']}`)
+          }
+          else{
+            logMessage(`\t\t\t\t${current_b['subject']}\t\t\t${current_b['open_times']}`)
+          }
+          first_flag = 0
+        })
       });
     } else {
       logMessage('Failed to retrieve open counts.');

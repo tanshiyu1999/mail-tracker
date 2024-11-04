@@ -10,7 +10,10 @@ export async function POST(req, res) {
   // const {department_code, csv, template} = await req.json();
 
   const formData = await req.formData();
-  console.log(formData);
+  const department = formData.get("department");
+  const csvFile = formData.get("csvFile");
+  const textFile = formData.get("textFile");
+  console.log(department, csvFile, textFile);
 
   // from the csv and template, I will obtain email_info
   // Somehow i will get this eventually

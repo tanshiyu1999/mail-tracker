@@ -48,11 +48,9 @@ export async function POST(req, res) {
       { status: 500 }
     );
   }
-  if (department !== "all") {
-    email_info = email_info.filter(info => info.department === department);
+  if (department.toLowerCase() !== "all") {
+    email_info = email_info.filter(info => info.department.toLowerCase() === department.toLowerCase());
   }
-
-
 
   try {
     for (let i = 0; i < email_info.length; i++) { 

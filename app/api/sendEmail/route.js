@@ -2,7 +2,7 @@
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
 import { sql } from '@vercel/postgres';
-
+import generateEmails from "@/app/script/generate";
 // Example post req 
 
 
@@ -13,7 +13,13 @@ export async function POST(req, res) {
   const department = formData.get("department");
   const csvFile = formData.get("csvFile");
   const textFile = formData.get("textFile");
-  console.log(department, csvFile, textFile);
+
+  console.log(csvFile, textFile);
+  const {recipientData, emailContents} = generateEmails(csvFile, textFile);
+
+  console.log(recipientData);
+
+  console.log(emailContents);
 
   // from the csv and template, I will obtain email_info
   // Somehow i will get this eventually

@@ -14,45 +14,19 @@ export async function POST(req, res) {
   const csvFile = formData.get("csvFile");
   const textFile = formData.get("textFile");
 
-  console.log(csvFile, textFile);
-  const {recipientData, emailContents} = generateEmails(csvFile, textFile);
+  let email_info;
 
-  console.log(recipientData);
+  async function handleEmails() {
+    try {
+      const email_info = await generateEmails(csvFile, textFile);
+      return email_info;
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
 
-  console.log(emailContents);
-
-  // from the csv and template, I will obtain email_info
-  // Somehow i will get this eventually
-  let email_info = [
-    {
-      department_code: "SOC",
-      recipient_email: "tanshiyu1999@gmail.com",
-      subject: "Imagine",
-      html: `
-        <p>Dear John Doe,</p>
-        <p>We are writing to inform you that our policy has been updated.</p>
-      `
-    },
-    {
-      department_code: "CSC",
-      recipient_email: "john.doe@example.com",
-      subject: "Policy Update",
-      html: `
-        <p>Dear John Doe,</p>
-        <p>We are writing to inform you that our policy has been updated.</p>
-      `
-    },
-    {
-      department_code: "SOC",
-      recipient_email: "tanshiyu1999@gmail.com",
-      subject: "Why no work",
-      html: `
-        <p>Dear John 2,</p>
-        <p>We are writing to inform you that our policy has been updated.</p>
-      `
-    },
-  ]
-
+  email_info = await handleEmails();
+  
 
   // Create a transporter
   const transporter = nodemailer.createTransport({
@@ -68,27 +42,31 @@ export async function POST(req, res) {
 
   const batchId = uuidv4();
 
-  email_info = email_info.filter(info => info.department_code === department_code);
+  email_info = email_info.filter(info => info.department === department);
+
+  // console.log(email_info)
 
   try {
-    console.log(email_info)
     for (let i = 0; i < email_info.length; i++) { 
       const trackingId = uuidv4();
-      const text = "Plaintext version of the message";
+      const trackingImg = `<img src="${process.env.BASE_URL}/api/track?trackingId=${trackingId}" width="1" height="1" alt="" style="display:inline;" />`;
+      const html = email_info[i].emailHTML.replace('<body>', `<body>${trackingImg}`);
+
+
       const mailOptions = {
         from: process.env.EMAIL_USER,
-        to: email_info[i].recipient_email,
+        to: email_info[i].email,
         subject: email_info[i].subject,
-        text: text,
-        html: `${text} <img src="${process.env.BASE_URL}/api/track?trackingId=${trackingId}" width="1" height="1" alt="" style="display:inline;" />`,
-
+        html: html,
       };
+
+      console.log("Email Sent");
     
 
       await transporter.sendMail(mailOptions);
 
 
-      await sql`INSERT INTO email_tracking (department_code, batch_id, tracking_id, recipient_email, subject) VALUES (${department_code}, ${batchId}, ${trackingId}, ${email_info[i].recipient_email}, ${email_info[i].subject})`;
+      await sql`INSERT INTO email_tracking (department_code, batch_id, tracking_id, recipient_email, subject) VALUES (${department}, ${batchId}, ${trackingId}, ${email_info[i].email}, ${email_info[i].subject})`;
     }
     return new Response(
       JSON.stringify({ message: "Emails sent successfully" }),

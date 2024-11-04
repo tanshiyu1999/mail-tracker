@@ -7,7 +7,10 @@ import { sql } from '@vercel/postgres';
 
 
 export async function POST(req, res) {
-  const {department_code, csv, template} = await req.json();
+  // const {department_code, csv, template} = await req.json();
+
+  const formData = await req.formData();
+  console.log(formData);
 
   // from the csv and template, I will obtain email_info
   // Somehow i will get this eventually

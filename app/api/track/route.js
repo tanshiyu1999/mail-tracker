@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { sql } from '@vercel/postgres';
+import path from "path";
+import fs from "fs";
 
 export async function GET(request) {
+  console.log("I AM HERE");
   const { searchParams } = new URL(request.url);
   const trackingId = searchParams.get("trackingId");
 
@@ -14,12 +17,14 @@ export async function GET(request) {
   try {
     await sql`
       UPDATE email_tracking 
-      SET opened = TRUE, opened_at = CURRENT_TIMESTAMP 
+      SET count = count + 1 
       WHERE tracking_id = ${trackingId};
     `;
   } catch (error) {
     console.error("Error updating email tracking:", error);
   }
+
+  console.log("UPDATED")
 
   
   // Path to a 1x1 transparent pixel image

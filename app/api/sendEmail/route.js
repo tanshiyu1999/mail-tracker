@@ -3,12 +3,45 @@ import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
 import { sql } from '@vercel/postgres';
 
+// Example post req 
+
+
 export async function POST(req, res) {
-  const { to, subject, text } = await req.json();
+  const {department_code, csv, template} = await req.json();
 
-  const trackingId = uuidv4();
+  // from the csv and template, I will obtain email_info
+  // Somehow i will get this eventually
+  let email_info = [
+    {
+      department_code: "SOC",
+      recipient_email: "tanshiyu1999@gmail.com",
+      subject: "Imagine",
+      html: `
+        <p>Dear John Doe,</p>
+        <p>We are writing to inform you that our policy has been updated.</p>
+      `
+    },
+    {
+      department_code: "CSC",
+      recipient_email: "john.doe@example.com",
+      subject: "Policy Update",
+      html: `
+        <p>Dear John Doe,</p>
+        <p>We are writing to inform you that our policy has been updated.</p>
+      `
+    },
+    {
+      department_code: "SOC",
+      recipient_email: "tanshiyu1999@gmail.com",
+      subject: "Why no work",
+      html: `
+        <p>Dear John 2,</p>
+        <p>We are writing to inform you that our policy has been updated.</p>
+      `
+    },
+  ]
 
-  console.log(trackingId)
+
   // Create a transporter
   const transporter = nodemailer.createTransport({
     service: "gmail", // or any other email service
@@ -21,24 +54,32 @@ export async function POST(req, res) {
     },
   });
 
-  // Define the email options
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: to,
-    subject: subject,
-    text: text,
-    html: `${text} <img src="${process.env.BASE_URL}/api/track?trackingId=${trackingId}" width="1" height="1" alt="" style="display:none;" />`,
-  };
+  const batchId = uuidv4();
 
-
+  email_info = email_info.filter(info => info.department_code === department_code);
 
   try {
-    await transporter.sendMail(mailOptions);
+    console.log(email_info)
+    for (let i = 0; i < email_info.length; i++) { 
+      const trackingId = uuidv4();
+      const text = "Plaintext version of the message";
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email_info[i].recipient_email,
+        subject: email_info[i].subject,
+        text: text,
+        html: `${text} <img src="${process.env.BASE_URL}/api/track?trackingId=${trackingId}" width="1" height="1" alt="" style="display:inline;" />`,
 
-    await sql`INSERT INTO email_tracking (tracking_id, recipient_email, subject) VALUES (${trackingId}, ${to}, ${subject})`;
+      };
     
+
+      await transporter.sendMail(mailOptions);
+
+
+      await sql`INSERT INTO email_tracking (department_code, batch_id, tracking_id, recipient_email, subject) VALUES (${department_code}, ${batchId}, ${trackingId}, ${email_info[i].recipient_email}, ${email_info[i].subject})`;
+    }
     return new Response(
-      JSON.stringify({ message: "Email sent successfully" }),
+      JSON.stringify({ message: "Emails sent successfully" }),
       { status: 200 }
     );
   } catch (error) {

@@ -1,0 +1,98 @@
+/* Main form styling */
+.smart-mailer {
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%; /* Responsive width */
+  margin: 5vh auto; /* Centered with top margin */
+  font-family: Arial, sans-serif;
+  background-color: #AEDFF7; /* Pastel blue background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Spacing between form elements */
+}
+
+/* Input and Textarea styling */
+input[type="text"],
+input[type="file"],
+textarea {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #FFFACD; /* Pastel yellow background */
+  font-size: 1rem;
+  width: 100%; /* Full-width inputs */
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="file"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: #FFB6C1; /* Light pink border on focus */
+  box-shadow: 0 0 5px rgba(255, 182, 193, 0.4); /* Subtle pink glow */
+}
+
+/* Button styling */
+.button-container {
+  display: flex;
+  gap: 10px; /* Space between the two buttons */
+  justify-content: center;
+}
+
+.pastel-pink-button {
+  background-color: #FFD1DC;
+  color: #333;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.pastel-pink-button:hover {
+  background-color: #FFB6C1; /* Slightly darker pink on hover */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Button shadow on hover */
+}
+
+/* Progress log styling */
+.progress-log {
+  max-height: 300px;
+  height: 100%; /* Responsive height */
+  overflow-y: scroll;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-top: 20px;
+  background-color: #E6E6FA; /* Pastel purple background */
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.log-messages p {
+  margin: 0;
+  padding: 5px 0;
+  color: #333;
+}
+
+/* General label styling */
+label {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Adjust form container on larger screens */
+@media (min-width: 768px) {
+  .smart-mailer {
+    padding: 40px;
+    max-width: 700px;
+  }
+
+  .pastel-pink-button {
+    font-size: 1.1rem;
+  }
+}

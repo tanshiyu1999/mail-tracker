@@ -14,12 +14,13 @@ async function generateEmails(csvFile, textFile) {
         csvStream
             .pipe(csv())
             .on('data', (row) => {
-                const trimmedRow = {
-                    Department_Code: row['Department_Code']?.trim(),
-                    Email: row[' Email']?.trim(),
-                    Campany: row[' Campany']?.trim(),
-                    Name: row[' Name']?.trim(),
-                };
+                // Trim whitespace from field names and values
+                const trimmedRow = {};
+                for (const key in row) {
+                    if (row.hasOwnProperty(key)) {
+                        trimmedRow[key.trim()] = row[key]?.trim();
+                    }
+                }
                 recipients.push(trimmedRow);
             })
             .on('end', resolve)
@@ -36,37 +37,37 @@ async function generateEmails(csvFile, textFile) {
     const subjectMatch = template.match(/<h2>Subject:\s*(.*?)<\/h2>/);
     const subject = subjectMatch ? subjectMatch[1] : 'No Subject';
 
-    // Prepare emails for each recipient
-    const emails = recipients.map(recipient => {
-        let emailContent = template
-            .replace('#name#', recipient.Name)
-            .replace('#department_code#', recipient.Department_Code)
-            .replace('#company#', recipient.Campany);
+    // Prepare emails for each recipient and return the combined results
+    const results = recipients.map(recipient => {
+        let emailContent = template;
 
-        // Remove subject HTML from the content
+        // Replace placeholders dynamically in the template based on CSV headers
+        for (const key in recipient) {
+            if (recipient.hasOwnProperty(key)) {
+                const placeholder = `#${key}#`;
+                emailContent = emailContent.replace(new RegExp(placeholder, 'g'), recipient[key]);
+            }
+        }
         emailContent = emailContent.replace(/<h2>Subject:.*?<\/h2>/, '');
 
-        return {
-            recipientInfo: {
-                name: recipient.Name,
-                email: recipient.Email,
-                department: recipient.Department_Code,
-                company: recipient.Campany,
-                subject: subject
-            },
+        // Pack the information and email content into a single object
+        const result = {
+            name: recipient.Name,
+            email: recipient.Email,
+            department: recipient.Department_Code,
+            company: recipient.Campany,
+            subject: subject,
             emailHTML: emailContent
         };
+
+        return result;
     });
 
-    const recipientData = emails.map(email => email.recipientInfo);
-    const emailContents = emails.map(email => email.emailHTML);
+    // Log the final output for debugging
+    console.log('Final output:', results);
 
-    console.log('Recipient Data:', recipientData);
-    console.log('Email HTML Contents:', emailContents);
-    return {
-        recipientData,
-        emailContents
-    }
+    // Return the combined results
+    return results;
 }
 
 export default generateEmails;

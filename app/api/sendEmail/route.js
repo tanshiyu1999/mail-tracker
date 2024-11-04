@@ -14,12 +14,12 @@ export async function POST(req, res) {
   const csvFile = formData.get("csvFile");
   const textFile = formData.get("textFile");
 
-  let email_info;
+  let email_info = [];
 
   async function handleEmails() {
     try {
       const email_info = await generateEmails(csvFile, textFile);
-      return email_info;
+      return email_info ? email_info : [];
     } catch (error) {
       console.error("Error:", error);
     }
@@ -42,16 +42,23 @@ export async function POST(req, res) {
 
   const batchId = uuidv4();
 
-  email_info = email_info.filter(info => info.department === department);
+  if (email_info.length === 0) {
+    return new Response(
+      JSON.stringify({ error: "Failed to generate emails" }),
+      { status: 500 }
+    );
+  }
+  if (department !== "all") {
+    email_info = email_info.filter(info => info.department === department);
+  }
 
-  // console.log(email_info)
+
 
   try {
     for (let i = 0; i < email_info.length; i++) { 
       const trackingId = uuidv4();
       const trackingImg = `<img src="${process.env.BASE_URL}/api/track?trackingId=${trackingId}" width="1" height="1" alt="" style="display:inline;" />`;
-      const html = email_info[i].emailHTML.replace('<body>', `<body>${trackingImg}`);
-
+      const html = email_info[i].emailHTML.replace('</body>', `${trackingImg}</body>`);
 
       const mailOptions = {
         from: process.env.EMAIL_USER,
@@ -60,7 +67,6 @@ export async function POST(req, res) {
         html: html,
       };
 
-      console.log("Email Sent");
     
 
       await transporter.sendMail(mailOptions);
